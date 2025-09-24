@@ -1,0 +1,30 @@
+create pekerjaan
+{
+  "alumni_id": 17,
+  "nama_perusahaan": "PT TRac",
+  "posisi_jabatan": "Project Mamager",
+  "bidang_industri": "Teknologi",
+  "lokasi_kerja": "Jakarta",
+  "gaji_range": "10-15 juta",
+  "tanggal_mulai_kerja": "2022-06-01",
+  "tanggal_selesai_kerja": null,
+  "status_pekerjaan": "selesai",
+  "deskripsi_pekerjaan": "membangun arsitektur"
+}
+
+
+// create user sekarang
+{
+  "nim": "21081010123",
+  "nama": "Budi Santoso",
+  "jurusan": "Teknik Informatika",
+  "angkatan": 2021,
+  "tahun_lulus": 2025,
+  "email": "budi@example.com",
+  "no_telepon": "081234567890",
+  "alamat": "Jl. Soekarno Hatta No. 123",
+  "role": "user",
+  "fakultas": "Teknik",
+  "password": "rahasia123"
+}
+
