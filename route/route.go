@@ -20,7 +20,7 @@ func SetupRoutes(app *fiber.App, db *sql.DB) {
 	// alumnni routes
 	alumniService := service.NewAlumniService(alumniRepo)
 	alumni := api.Group("/alumni")
-	// Admin & User (cukup RequireAuth)
+	
 	alumni.Get("/", middleware.RequireAuth, alumniService.GetAlumni)
 	alumni.Get("/:id", middleware.RequireAuth, alumniService.GetByID)
 	alumni.Get("/fakultas/:fakultas", middleware.RequireAuth, alumniService.GetByFakultas)
@@ -29,10 +29,16 @@ func SetupRoutes(app *fiber.App, db *sql.DB) {
 	alumni.Put("/:id", middleware.RequireAuth, middleware.AdminOnly(), alumniService.Update)
 	alumni.Delete("/:id", middleware.RequireAuth, middleware.AdminOnly(), alumniService.Delete)
 	
+	
 	// route pekerjaan
 	pekerjaanRepo := repository.NewPekerjaanRepository(db)
 	pekerjaanService := service.NewPekerjaanService(pekerjaanRepo)
 	pekerjaan := api.Group("/pekerjaan")
+
+	// uts
+	pekerjaan.Put("/restore/:id", middleware.RequireAuth, pekerjaanService.Restore)
+	pekerjaan.Get("/trash", middleware.RequireAuth, pekerjaanService.GetTrash)
+	pekerjaan.Delete("/deletetrash/:id", middleware.RequireAuth, pekerjaanService.DeleteTrash)
 	// Admin & User
 	pekerjaan.Get("/", middleware.RequireAuth, pekerjaanService.GetAll)
 	pekerjaan.Get("/:id", middleware.RequireAuth, pekerjaanService.GetByID)

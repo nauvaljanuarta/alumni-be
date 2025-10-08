@@ -41,12 +41,12 @@ func (s *PekerjaanService) GetAll(c *fiber.Ctx) error {
 
 	data, err := s.repo.GetAllPekerjaan(search, sortBy, order, limit, offset)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch pekerjaan"})
+		return c.Status(500).JSON(fiber.Map{"error": "pekerjaan not found"})
 	}
 
 	total, err := s.repo.Count(search)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to count pekerjaan"})
+		return c.Status(500).JSON(fiber.Map{"error": "gagal menghitung pekerjaan"})
 	}
 
 	response := models.PekerjaanResponse{
@@ -119,14 +119,15 @@ func (s *PekerjaanService) SoftDelete(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	
 	userID := c.Locals("user_id")
-	role := c.Locals("role").(string) == "admin"
+	role := c.Locals("role").(string)
+	isAdmin := role == "admin"
 	
 	existingData, err := s.repo.GetByID(id)
 	if err != nil {
 		return c.Status(404).JSON(fiber.Map{"message": "pekerjaan not found"})
 	}
 	
-	if existingData.AlumniID != userID || role {
+	if existingData.AlumniID != userID && !isAdmin {
 		return c.Status(403).JSON(fiber.Map{"message": "bukan pekerjaanmu dan bukan admin"})
 	}
 	
@@ -148,4 +149,85 @@ func (s *PekerjaanService) SoftDeleteBulk(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"message": err.Error()})
 	}
 	return c.JSON(fiber.Map{"message": "all pekerjaan soft deleted"})
+}
+
+func (s *PekerjaanService) Restore(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	
+	userID := c.Locals("user_id")
+	role := c.Locals("role").(string)
+	isAdmin := role == "admin"
+	
+	existingData, err := s.repo.GetByID(id)
+	if err != nil {
+		return c.Status(404).JSON(fiber.Map{"message": "pekerjaan not found"})
+	}
+	
+	if existingData.AlumniID != userID && !isAdmin {
+		return c.Status(403).JSON(fiber.Map{"message": "bukan pekerjaanmu dan bukan admin"})
+	}
+	
+	
+	var updateReq models.UpdatePekerjaan
+	if err := s.repo.Restore(id, updateReq); err != nil {
+		return c.Status(500).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.JSON(fiber.Map{"message": "pekerjaan restored"})
+}
+
+func (s *PekerjaanService) GetTrash(c *fiber.Ctx) error {
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	sortBy := c.Query("sortBy", "created_at") 
+	order := c.Query("order", "desc")
+	search := c.Query("search", "")
+
+	offset := (page - 1) * limit
+
+	sortByWhitelist := map[string]bool{
+		"id": true, "alumni_id": true, "nama_perusahaan": true,
+		"posisi_jabatan": true, "bidang_industri": true,
+		"lokasi_kerja": true, "status_pekerjaan": true,
+		"created_at": true,
+	}
+	if !sortByWhitelist[sortBy] {
+		sortBy = "created_at"
+	}
+
+	if strings.ToLower(order) != "desc" {
+		order = "asc"
+	}
+
+	data, err := s.repo.GetTrash(search, sortBy, order, limit, offset)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "pekerjaan trash not found"})
+	}
+
+	total, err := s.repo.Count(search)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "gagal menghitung pekerjaan"})
+	}
+
+	response := models.PekerjaanResponse{
+		Data: data,
+		Meta: models.MetaInfo{
+			Page:   page,
+			Limit:  limit,
+			Total:  total,
+			Pages:  (total + limit - 1) / limit,
+			SortBy: sortBy,
+			Order:  order,
+			Search: search,
+		},
+	}
+
+	return c.JSON(response)
+}
+
+func (s *PekerjaanService) DeleteTrash(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	if err := s.repo.DeleteTrash(id); err != nil {
+		return c.Status(500).JSON(fiber.Map{"message": err.Error()})
+	}
+	return c.JSON(fiber.Map{"message": "pekerjaan trash deleted hardly"})
 }

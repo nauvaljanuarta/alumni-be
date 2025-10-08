@@ -1,30 +1,84 @@
 create pekerjaan
 {
-  "alumni_id": 17,
-  "nama_perusahaan": "PT TRac",
-  "posisi_jabatan": "Project Mamager",
-  "bidang_industri": "Teknologi",
+  "alumni_id": 3 ,
+  "nama_perusahaan": "PT Astra International",
+  "posisi_jabatan": "Software Engineer",
+  "bidang_industri": "Teknologi Otomotif",
   "lokasi_kerja": "Jakarta",
-  "gaji_range": "10-15 juta",
-  "tanggal_mulai_kerja": "2022-06-01",
+  "gaji_range": "8-10 juta",
+  "tanggal_mulai_kerja": "2023-01-10",
   "tanggal_selesai_kerja": null,
-  "status_pekerjaan": "selesai",
-  "deskripsi_pekerjaan": "membangun arsitektur"
+  "status_pekerjaan": "Full-time",
+  "deskripsi_pekerjaan": "Mengembangkan aplikasi internal dan integrasi sistem ERP."
 }
 
 
 // create user sekarang
-{
-  "nim": "21081010123",
-  "nama": "Budi Santoso",
-  "jurusan": "Teknik Informatika",
-  "angkatan": 2021,
-  "tahun_lulus": 2025,
-  "email": "budi@example.com",
-  "no_telepon": "081234567890",
-  "alamat": "Jl. Soekarno Hatta No. 123",
-  "role": "user",
-  "fakultas": "Teknik",
-  "password": "rahasia123"
-}
+[
+    {
+        "nim": "A001",
+        "nama": "Nauval Januarta",
+        "jurusan": "Teknik Informatika",
+        "angkatan": 2019,
+        "tahun_lulus": 2023,
+        "email": "nauval.januarta@example.com",
+        "no_telepon": "081234567890",
+        "alamat": "Jl. Mawar No. 10, Malang",
+        "fakultas": "Teknologi Informasi",
+        "password": "password123"
+    },
+    {
+        "nim": "A002",
+        "nama": "Rina Andini",
+        "jurusan": "Sistem Informasi",
+        "angkatan": 2018,
+        "tahun_lulus": 2022,
+        "email": "rina.andini@example.com",
+        "no_telepon": "082134567891",
+        "alamat": "Jl. Kenanga No. 7, Surabaya",
+        "fakultas": "Teknologi Informasi",
+        "password": "password123"
+    },
+    {
+        "nim": "A003",
+        "nama": "Ahmad Fajar",
+        "jurusan": "Teknik Komputer",
+        "angkatan": 2020,
+        "tahun_lulus": 2024,
+        "email": "ahmad.fajar@example.com",
+        "no_telepon": "083134567892",
+        "alamat": "Jl. Melati No. 5, Jakarta",
+        "fakultas": "Teknik Elektro",
+        "password": "password123"
+    },
+    {
+        "nim": "A004",
+        "nama": "Putri Rahmawati",
+        "jurusan": "Teknik Informatika",
+        "angkatan": 2017,
+        "tahun_lulus": 2021,
+        "email": "putri.rahmawati@example.com",
+        "no_telepon": "084134567893",
+        "alamat": "Jl. Anggrek No. 9, Bandung",
+        "fakultas": "Teknologi Informasi",
+        "password": "password123"
+    },
+    {
+        "nim": "A005",
+        "nama": "Dwi Saputra",
+        "jurusan": "Teknik Elektro",
+        "angkatan": 2016,
+        "tahun_lulus": 2020,
+        "email": "dwi.saputra@example.com",
+        "no_telepon": "085134567894",
+        "alamat": "Jl. Teratai No. 3, Yogyakarta",
+        "fakultas": "Teknik Elektro",
+        "password": "password123"
+    }
+]
 
+
+bikin 3 endpoint 
+- endpoint untuk trash menampilkan data untuk di sooft delete
+- setelah data trash, hard delete
+- hard delete atau soft delete

@@ -16,7 +16,7 @@ type Pekerjaan struct {
 	DeskripsiPekerjaan  *string    `json:"deskripsi_pekerjaan,omitempty"`
 	CreatedAt           time.Time  `json:"created_at"`
 	UpdatedAt           time.Time  `json:"updated_at"`
-	IsDeleted           bool       `json:"isDeleted"`
+	IsDeleted           bool       `json:"isdeleted"`
 }
 
 type CreatePekerjaan struct {
@@ -30,7 +30,7 @@ type CreatePekerjaan struct {
 	TanggalSelesaiKerja *string `json:"tanggal_selesai_kerja,omitempty"`
 	StatusPekerjaan     string  `json:"status_pekerjaan"`
 	DeskripsiPekerjaan  *string `json:"deskripsi_pekerjaan,omitempty"`
-	IsDeleted           bool    `json:"isDeleted"`
+	IsDeleted           bool    `json:"isdeleted"`
 }
 
 type UpdatePekerjaan struct {
@@ -44,5 +44,5 @@ type UpdatePekerjaan struct {
 	StatusPekerjaan     string     `json:"status_pekerjaan" validate:"oneof=aktif tidak_aktif resign"`
 	DeskripsiPekerjaan  *string    `json:"deskripsi_pekerjaan,omitempty"`
 	UpdatedAt           time.Time  `json:"updated_at"`
-	IsDeleted           bool       `json:"isDeleted"`
+	IsDeleted           bool       `json:"isdeleted"`
 }

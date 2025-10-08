@@ -13,14 +13,15 @@ type PekerjaanRepository struct {
 func NewPekerjaanRepository(db *sql.DB) *PekerjaanRepository {
 	return &PekerjaanRepository{DB: db}
 }
+
 func (r *PekerjaanRepository) GetAllPekerjaan(search, sortBy, order string, limit, offset int) ([]models.Pekerjaan, error) {
 	query := fmt.Sprintf(`
 		SELECT id, alumni_id, nama_perusahaan, posisi_jabatan, bidang_industri, 
 				 lokasi_kerja, gaji_range, tanggal_mulai_kerja, tanggal_selesai_kerja, 
-				 status_pekerjaan, deskripsi_pekerjaan, created_at, updated_at
+				 status_pekerjaan, deskripsi_pekerjaan, created_at, updated_at, isdeleted
 		FROM pekerjaan_alumni
-		WHERE nama_perusahaan ILIKE $1 OR posisi_jabatan ILIKE $1 
-				OR bidang_industri ILIKE $1 OR lokasi_kerja ILIKE $1
+		WHERE isdeleted=false AND (nama_perusahaan ILIKE $1 OR posisi_jabatan ILIKE $1 
+				OR bidang_industri ILIKE $1 OR lokasi_kerja ILIKE $1)
 		ORDER BY %s %s`, sortBy, order)
 
 	var rows *sql.Rows
@@ -41,7 +42,7 @@ func (r *PekerjaanRepository) GetAllPekerjaan(search, sortBy, order string, limi
 		if err := rows.Scan(
 			&p.ID, &p.AlumniID, &p.NamaPerusahaan, &p.PosisiJabatan, &p.BidangIndustri,
 			&p.LokasiKerja, &p.GajiRange, &p.TanggalMulaiKerja, &p.TanggalSelesaiKerja,
-			&p.StatusPekerjaan, &p.DeskripsiPekerjaan, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			&p.StatusPekerjaan, &p.DeskripsiPekerjaan, &p.CreatedAt, &p.UpdatedAt, &p.IsDeleted); err != nil {
 			return nil, err
 		}
 		list = append(list, p)
@@ -144,12 +145,74 @@ func (r *PekerjaanRepository) Delete(id int) error {
 }
 
 func (r *PekerjaanRepository) SoftDelete(id int,req models.UpdatePekerjaan) error {
-	_, err := r.DB.Exec(`UPDATE pekerjaan_alumni SET isdelete=true, updated_at=NOW() WHERE id=$1`, id)
+	_, err := r.DB.Exec(`UPDATE pekerjaan_alumni SET isdeleted=true, updated_at=NOW() WHERE id=$1`, id)
 	return err
 }
 
 func (r *PekerjaanRepository) SoftDeleteBulk() error {
-	query := `UPDATE pekerjaan_alumni SET isdelete=true, updated_at=NOW() WHERE isdelete=false`
+	query := `UPDATE pekerjaan_alumni SET isdeleted=true, updated_at=NOW() WHERE isdeleted=false`
 	_, err := r.DB.Exec(query)
 	return err
 }
+
+func (r *PekerjaanRepository) Restore(id int,req models.UpdatePekerjaan) error {
+	_, err := r.DB.Exec(`UPDATE pekerjaan_alumni SET isdeleted=false, updated_at=NOW() WHERE id=$1`, id)
+	return err
+}
+
+func (r *PekerjaanRepository) GetTrash(search, sortBy, order string, limit, offset int) ([]models.Pekerjaan, error) {
+	query := fmt.Sprintf(`
+		SELECT id, alumni_id, nama_perusahaan, posisi_jabatan, bidang_industri, 
+				 lokasi_kerja, gaji_range, tanggal_mulai_kerja, tanggal_selesai_kerja, 
+				 status_pekerjaan, deskripsi_pekerjaan, created_at, updated_at, isdeleted
+		FROM pekerjaan_alumni
+		WHERE isdeleted=true AND (nama_perusahaan ILIKE $1 OR posisi_jabatan ILIKE $1 
+				OR bidang_industri ILIKE $1 OR lokasi_kerja ILIKE $1)
+		ORDER BY %s %s`, sortBy, order)
+
+	var rows *sql.Rows
+	var err error
+	if limit > 0 {
+		rows, err = r.DB.Query(query+" LIMIT $2 OFFSET $3", "%"+search+"%", limit, offset)
+	} else {
+		rows, err = r.DB.Query(query, "%"+search+"%")
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []models.Pekerjaan
+	for rows.Next() {
+		var p models.Pekerjaan
+		if err := rows.Scan(
+			&p.ID, &p.AlumniID, &p.NamaPerusahaan, &p.PosisiJabatan, &p.BidangIndustri,
+			&p.LokasiKerja, &p.GajiRange, &p.TanggalMulaiKerja, &p.TanggalSelesaiKerja,
+			&p.StatusPekerjaan, &p.DeskripsiPekerjaan, &p.CreatedAt, &p.UpdatedAt,&p.IsDeleted); err != nil {
+			return nil, err
+		}
+		list = append(list, p)
+	}
+	return list, nil
+}
+
+func (r *PekerjaanRepository) CountTrash(search string) (int, error) {
+	var total int
+	countQuery := `
+		SELECT COUNT(*) FROM pekerjaan_alumni 
+		WHERE isdeleted=true AND (nama_perusahaan ILIKE $1 OR posisi_jabatan ILIKE $1 
+			OR bidang_industri ILIKE $1 OR lokasi_kerja ILIKE $1)
+	`
+	err := r.DB.QueryRow(countQuery, "%"+search+"%").Scan(&total)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	}
+	return total, nil
+}
+
+func (r *PekerjaanRepository) DeleteTrash(id int) error {
+	_, err := r.DB.Exec(`DELETE FROM pekerjaan_alumni WHERE id=$1 AND isdeleted=true`, id)
+	return err
+}
+
+
