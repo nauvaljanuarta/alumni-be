@@ -10,11 +10,21 @@ type MetaInfo struct {
 	Search string `json:"search"`
 }
 
+// type AlumniResponse struct {
+// 	Data []Alumni `json:"data"`
+// 	Meta MetaInfo `json:"meta"`
+// }
+// type PekerjaanResponse struct {
+// 	Data []Pekerjaan `json:"data"`
+// 	Meta MetaInfo `json:"meta"`
+// }
+
 type AlumniResponse struct {
-	Data []Alumni `json:"data"`
-	Meta MetaInfo `json:"meta"`
+	Data []Alumni `bson:"data" json:"data"`
+	Meta MetaInfo `bson:"meta" json:"meta"`
 }
+
 type PekerjaanResponse struct {
-	Data []Pekerjaan `json:"data"`
-	Meta MetaInfo `json:"meta"`
+	Data []Pekerjaan `bson:"data" json:"data"`
+	Meta MetaInfo    `bson:"meta" json:"meta"`
 }

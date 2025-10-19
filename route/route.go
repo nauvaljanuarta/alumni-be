@@ -1,15 +1,17 @@
 package route
 
 import (
-	"database/sql"
+	// "database/sql"
 	"pert5/app/repository"
 	"pert5/app/service"
 	"pert5/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func SetupRoutes(app *fiber.App, db *sql.DB) {
+// func SetupRoutes(app *fiber.App, db *sql.DB) {
+func SetupRoutes(app *fiber.App, db *mongo.Database) {
 	api := app.Group("/pert5")
 
 	// auth login 
@@ -39,10 +41,12 @@ func SetupRoutes(app *fiber.App, db *sql.DB) {
 	pekerjaan.Put("/restore/:id", middleware.RequireAuth, pekerjaanService.Restore)
 	pekerjaan.Get("/trash", middleware.RequireAuth, pekerjaanService.GetTrash)
 	pekerjaan.Delete("/deletetrash/:id", middleware.RequireAuth, pekerjaanService.DeleteTrash)
-	// Admin & User
+	
+	// admin & user
 	pekerjaan.Get("/", middleware.RequireAuth, pekerjaanService.GetAll)
 	pekerjaan.Get("/:id", middleware.RequireAuth, pekerjaanService.GetByID)
 	pekerjaan.Put("/softdelete/:id", middleware.RequireAuth, pekerjaanService.SoftDelete)
+
 	// Hanya Admin
 	pekerjaan.Get("/alumni/:alumni_id", middleware.RequireAuth, middleware.AdminOnly(), pekerjaanService.GetByAlumniID)
 	pekerjaan.Post("/", middleware.RequireAuth, middleware.AdminOnly(), pekerjaanService.Create)
@@ -50,5 +54,3 @@ func SetupRoutes(app *fiber.App, db *sql.DB) {
 	pekerjaan.Delete("/:id", middleware.RequireAuth, middleware.AdminOnly(), pekerjaanService.Delete)
 	pekerjaan.Put("/softdeletebulk", middleware.RequireAuth,middleware.AdminOnly(), pekerjaanService.SoftDeleteBulk)
 }
-
-// http://localhost:3000/pert5/pekerjaan/softdeleted/20

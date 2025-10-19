@@ -9,10 +9,10 @@ import (
 )
 
 type AuthService struct {
-	repo *repository.AlumniRepository
+	repo repository.IAlumniRepository 
 }
 
-func NewAuthService(repo *repository.AlumniRepository) *AuthService {
+func NewAuthService(repo repository.IAlumniRepository) *AuthService {
 	return &AuthService{repo: repo}
 }
 
@@ -25,7 +25,7 @@ func (s *AuthService) Login(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"message": "invalid request"})
 	}
 	// cari alumni berdasarkan email mengecek apakah emailada atau tidak
-	alumni, err := s.repo.GetByEmail(req.Email)
+	alumni, err := s.repo.GetByEmail(c.Context(), req.Email)
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{"message": "invalid email or password"})
 	}

@@ -16,16 +16,17 @@ create pekerjaan
 // create user sekarang
 [
     {
-        "nim": "A001",
+        "nim": "434231039",
         "nama": "Nauval Januarta",
         "jurusan": "Teknik Informatika",
         "angkatan": 2019,
         "tahun_lulus": 2023,
-        "email": "nauval.januarta@example.com",
+        "email": "admin@gmail.com",
         "no_telepon": "081234567890",
         "alamat": "Jl. Mawar No. 10, Malang",
         "fakultas": "Teknologi Informasi",
-        "password": "password123"
+        "password": "admin",
+        "role":"admin"
     },
     {
         "nim": "A002",
