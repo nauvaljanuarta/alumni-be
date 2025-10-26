@@ -53,4 +53,22 @@ func SetupRoutes(app *fiber.App, db *mongo.Database) {
 	pekerjaan.Put("/:id", middleware.RequireAuth, middleware.AdminOnly(), pekerjaanService.Update)
 	pekerjaan.Delete("/:id", middleware.RequireAuth, middleware.AdminOnly(), pekerjaanService.Delete)
 	pekerjaan.Put("/softdeletebulk", middleware.RequireAuth,middleware.AdminOnly(), pekerjaanService.SoftDeleteBulk)
+
+  // route file
+fileRepo := repository.NewFileRepository(db)
+fileService := service.NewFileService(fileRepo, "./uploads")
+file := api.Group("/file")
+
+
+// user bisa lihat file
+file.Get("/", middleware.RequireAuth, fileService.GetAllFiles)
+file.Get("/:id", middleware.RequireAuth, fileService.GetFileByID)
+file.Get("/alumni/:alumni_id", middleware.RequireAuth, fileService.GetFilesByAlumniID)
+
+// admin only upload/update/delete
+file.Post("/", middleware.RequireAuth, fileService.UploadFile)              
+file.Post("/:alumni_id", middleware.RequireAuth, middleware.AdminOnly(), fileService.UploadFileAdmin) // admin upload ke alumni lain
+file.Put("/:id", middleware.RequireAuth, middleware.AdminOnly(), fileService.UpdateFile)
+file.Delete("/:id", middleware.RequireAuth, middleware.AdminOnly(), fileService.DeleteFile)
 }
+

@@ -239,10 +239,10 @@ import (
 
 
 type PekerjaanService struct {
-	repo repository.IPekerjaanRepository // ← Ubah ke interface
+	repo repository.IPekerjaanRepository //  ubah ke interface
 }
 
-func NewPekerjaanService(repo repository.IPekerjaanRepository) *PekerjaanService { // ← Ubah ke interface
+func NewPekerjaanService(repo repository.IPekerjaanRepository) *PekerjaanService {  //ubah ke interface
 	return &PekerjaanService{repo: repo}
 }
 
