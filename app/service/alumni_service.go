@@ -145,6 +145,14 @@ func NewAlumniService(repo repository.IAlumniRepository) *AlumniService {
 // }
 
 
+// GetUsers godoc
+// @Summary Get all Alumni
+// @Description Ambil daftar semua Alumni
+// @Tags Alumni
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} models.Alumni
+// @Router /alumni [get]
 func (s *AlumniService) GetAlumni(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
@@ -175,13 +183,11 @@ func (s *AlumniService) GetAlumni(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch alumni"})
 	}
 
-	// ⚠️ Perlu implementasi Count method di repository
-	// total, err := s.repo.Count(ctx, search)
+	// total, err = s.repo.Count(ctx, search)
 	// if err != nil {
 	// 	return c.Status(500).JSON(fiber.Map{"error": "Failed to count alumni"})
 	// }
 
-	// Sementara hardcode total atau implementasi Count method
 	total := len(alumni) // temporary solution
 
 	response := models.AlumniResponse{
@@ -200,11 +206,21 @@ func (s *AlumniService) GetAlumni(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
+// GetByID godoc
+// @Summary Get Alumni by ID
+// @Description Ambil data alumni berdasarkan ID
+// @Tags Alumni
+// @Accept  json
+// @Produce  json
+// @Param id path string true "ID Alumni"
+// @Success 200 {object} models.Alumni
+// @Failure 404 {object} map[string]string "Alumni tidak ditemukan"
+// @Router /alumni/{id} [get]
 func (s *AlumniService) GetByID(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	id := c.Params("id") // ← String ID untuk MongoDB
+	id := c.Params("id") 
 	data, err := s.repo.GetAlumniByID(ctx, id)
 	if err != nil {
 		return c.Status(404).JSON(fiber.Map{"id": id, "message": "alumni doesnt exist"})
@@ -212,14 +228,22 @@ func (s *AlumniService) GetByID(c *fiber.Ctx) error {
 	return c.JSON(data)
 }
 
-// ⚠️ Method ini perlu ditambahkan ke interface jika masih diperlukan
+
+// GetByFakultas godoc
+// @Summary Get Alumni by Fakultas
+// @Description Ambil daftar alumni berdasarkan fakultas
+// @Tags Alumni
+// @Accept  json
+// @Produce  json
+// @Param fakultas path string true "Nama Fakultas"
+// @Success 200 {array} models.Alumni
+// @Failure 404 {object} map[string]string "Alumni tidak ditemukan"
+// @Router /alumni/fakultas/{fakultas} [get]
 func (s *AlumniService) GetByFakultas(c *fiber.Ctx) error {
-	// Implementasi dengan GetAlumni dan filter fakultas
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
 	fakultas := c.Params("fakultas")
-	// Gunakan GetAlumni dengan search fakultas
 	alumni, err := s.repo.GetAlumni(ctx, fakultas, 0, 0, "nama", "asc")
 	if err != nil {
 		return c.Status(404).JSON(fiber.Map{"fakultas": fakultas, "message": "alumni doesnt exist"})
@@ -227,13 +251,23 @@ func (s *AlumniService) GetByFakultas(c *fiber.Ctx) error {
 	return c.JSON(alumni)
 }
 
+// Create godoc
+// @Summary Create new Alumni
+// @Description Tambahkan satu atau lebih alumni baru ke database
+// @Tags Alumni
+// @Accept  json
+// @Produce  json
+// @Param request body []models.CreateAlumni true "Data Alumni yang akan dibuat"
+// @Success 201 {object} map[string]interface{} "Alumni berhasil dibuat"
+// @Failure 400 {object} map[string]string "Request tidak valid"
+// @Failure 500 {object} map[string]string "Server Error"
+// @Router /alumni [post]
 func (s *AlumniService) Create(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
 
 	var reqs []models.CreateAlumni
 	if err := c.BodyParser(&reqs); err != nil {
-		// fallback: kalau body bukan array, coba parse tunggal
 		var single models.CreateAlumni
 		if err := c.BodyParser(&single); err != nil {
 			return c.Status(400).JSON(fiber.Map{"message": "invalid request"})
@@ -241,9 +275,8 @@ func (s *AlumniService) Create(c *fiber.Ctx) error {
 		reqs = append(reqs, single)
 	}
 
-	var ids []string // ← Ubah ke string untuk MongoDB ObjectID
+	var ids []string 
 	for _, req := range reqs {
-		// default role = user
 		if req.Role == "" {
 			req.Role = "user"
 		}
@@ -253,7 +286,6 @@ func (s *AlumniService) Create(c *fiber.Ctx) error {
 			return c.Status(500).JSON(fiber.Map{"message": "failed to hash password"})
 		}
 
-		// ✅ Convert CreateAlumni to Alumni model
 		alumni := &models.Alumni{
 			NIM:         req.NIM,
 			Nama:        req.Nama,
@@ -272,7 +304,7 @@ func (s *AlumniService) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"message": err.Error()})
 		}
-		ids = append(ids, result.ID.Hex()) // ← Convert ObjectID to string
+		ids = append(ids, result.ID.Hex()) 
 	}
 
 	return c.Status(201).JSON(fiber.Map{
@@ -282,17 +314,28 @@ func (s *AlumniService) Create(c *fiber.Ctx) error {
 	})
 }
 
+// Update godoc
+// @Summary Update Alumni
+// @Description Update data alumni berdasarkan ID
+// @Tags Alumni
+// @Accept  json
+// @Produce  json
+// @Param id path string true "ID Alumni"
+// @Param request body models.UpdateAlumni true "Data Alumni yang akan diperbarui"
+// @Success 200 {object} map[string]string "Alumni berhasil diperbarui"
+// @Failure 400 {object} map[string]string "Request tidak valid"
+// @Failure 500 {object} map[string]string "Server Error"
+// @Router /alumni/{id} [put]
 func (s *AlumniService) Update(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	id := c.Params("id") // ← String ID untuk MongoDB
+	id := c.Params("id") 
 	var req models.UpdateAlumni
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{"message": "invalid request"})
 	}
 
-	// ✅ Convert UpdateAlumni to Alumni model
 	alumni := &models.Alumni{
 		Nama:       req.Nama,
 		Role:       req.Role,
@@ -312,11 +355,21 @@ func (s *AlumniService) Update(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "alumni updated"})
 }
 
+// Delete godoc
+// @Summary Delete Alumni
+// @Description Hapus data alumni berdasarkan ID
+// @Tags Alumni
+// @Accept  json
+// @Produce  json
+// @Param id path string true "ID Alumni"
+// @Success 200 {object} map[string]string "Alumni berhasil dihapus"
+// @Failure 500 {object} map[string]string "Server Error"
+// @Router /alumni/{id} [delete]
 func (s *AlumniService) Delete(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	id := c.Params("id") // ← String ID untuk MongoDB
+	id := c.Params("id") 
 	if err := s.repo.DeleteAlumni(ctx, id); err != nil {
 		return c.Status(500).JSON(fiber.Map{"message": err.Error()})
 	}

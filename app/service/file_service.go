@@ -27,11 +27,24 @@ func NewFileService(repo repository.IFileRepository, uploadPath string) *FileSer
 		uploadPath: uploadPath,
 	}
 }
+
 func (s *FileService) UploadFile(c *fiber.Ctx) error {
 	return s.uploadFile(c, "")
 }
 
-// Admin upload untuk alumni tertentu
+// UploadFileAdmin godoc
+// @Summary Upload file untuk alumni tertentu (admin only)
+// @Description Admin mengunggah file untuk alumni tertentu berdasarkan ID
+// @Tags Files
+// @Accept multipart/form-data
+// @Produce json
+// @Param alumni_id path string true "Alumni ID"
+// @Param file formData file true "File yang akan diunggah (PDF/JPG/PNG)"
+// @Success 201 {object} models.FileResponse "File uploaded successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid alumni ID or file"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /pert5/files/upload/{alumni_id} [post]
 func (s *FileService) UploadFileAdmin(c *fiber.Ctx) error {
 	alumniID := c.Params("alumni_id")
 	if alumniID == "" {
@@ -43,7 +56,19 @@ func (s *FileService) UploadFileAdmin(c *fiber.Ctx) error {
 	return s.uploadFile(c, alumniID)
 }
 
-// Core upload logic
+// GetAllFiles godoc
+// @Summary Mendapatkan semua file
+// @Description Mengambil semua file dengan filter, pencarian, dan pagination
+// @Tags Files
+// @Produce json
+// @Param search query string false "Pencarian berdasarkan nama file"
+// @Param sortBy query string false "Kolom untuk pengurutan (default: uploadedAt)"
+// @Param order query string false "Urutan asc/desc (default: desc)"
+// @Param limit query int false "Jumlah data per halaman (default: 10)"
+// @Param offset query int false "Offset data (default: 0)"
+// @Success 200 {array} models.FileResponse "List of files"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /file [get]
 func (s *FileService) uploadFile(c *fiber.Ctx, alumniIDStr string) error {
 	userID := c.Locals("user_id").(primitive.ObjectID)
 	var alumniID primitive.ObjectID
@@ -137,6 +162,19 @@ func (s *FileService) uploadFile(c *fiber.Ctx, alumniIDStr string) error {
 	})
 }
 
+// GetAllFiles godoc
+// @Summary Mendapatkan semua file
+// @Description Mengambil semua file dengan filter, pencarian, dan pagination
+// @Tags Files
+// @Produce json
+// @Param search query string false "Pencarian berdasarkan nama file"
+// @Param sortBy query string false "Kolom untuk pengurutan (default: uploadedAt)"
+// @Param order query string false "Urutan asc/desc (default: desc)"
+// @Param limit query int false "Jumlah data per halaman (default: 10)"
+// @Param offset query int false "Offset data (default: 0)"
+// @Success 200 {array} models.FileResponse "List of files"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /file [get]
 // Get all files
 func (s *FileService) GetAllFiles(c *fiber.Ctx) error {
 	// Get query parameters
@@ -167,6 +205,17 @@ func (s *FileService) GetAllFiles(c *fiber.Ctx) error {
 	})
 }
 
+// GetFileByID godoc
+// @Summary Mendapatkan file berdasarkan ID
+// @Description Mengambil file tunggal berdasarkan ID file
+// @Tags Files
+// @Produce json
+// @Param id path string true "ID File"
+// @Success 200 {object} models.FileResponse "File retrieved successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid ID format"
+// @Failure 404 {object} map[string]interface{} "File not found"
+// @Security BearerAuth
+// @Router /file/{id} [get]
 // Get file by ID
 func (s *FileService) GetFileByID(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -196,7 +245,15 @@ func (s *FileService) GetFileByID(c *fiber.Ctx) error {
 	})
 }
 
-// Get files by alumni ID
+// GetFilesByAlumniID godoc
+// @Summary Mendapatkan file berdasarkan Alumni ID
+// @Description Mengambil semua file yang dimiliki oleh alumni tertentu
+// @Tags Files
+// @Produce json
+// @Param alumniID path string true "Alumni ID"
+// @Success 200 {array} models.FileResponse "Files retrieved successfully"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /file/alumni/{alumniID} [get]
 func (s *FileService) GetFilesByAlumniID(c *fiber.Ctx) error {
 	alumniID := c.Params("alumniID")
 	files, err := s.repo.GetByAlumniID(context.Background(), alumniID)
@@ -220,7 +277,19 @@ func (s *FileService) GetFilesByAlumniID(c *fiber.Ctx) error {
 	})
 }
 
-// Update file metadata
+// UpdateFile godoc
+// @Summary Update metadata file
+// @Description Memperbarui informasi file seperti nama, deskripsi, atau jenis file
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param id path string true "ID File"
+// @Param body body models.File true "Data file yang akan diperbarui"
+// @Success 200 {object} models.FileResponse "File updated successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 404 {object} map[string]interface{} "File not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /file/{id} [put]
 func (s *FileService) UpdateFile(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -264,6 +333,17 @@ func (s *FileService) UpdateFile(c *fiber.Ctx) error {
 	})
 }
 
+// DeleteFile godoc
+// @Summary Menghapus file
+// @Description Menghapus file dari server dan database
+// @Tags Files
+// @Produce json
+// @Param id path string true "ID File"
+// @Success 200 {object} map[string]interface{} "File deleted successfully"
+// @Failure 400 {object} map[string]interface{} "Invalid ID format"
+// @Failure 404 {object} map[string]interface{} "File not found"
+// @Failure 500 {object} map[string]interface{} "Failed to delete file"
+// @Router /file/{id} [delete]
 // Delete file (hard delete)
 func (s *FileService) DeleteFile(c *fiber.Ctx) error {
 	id := c.Params("id")

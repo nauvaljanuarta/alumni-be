@@ -246,8 +246,22 @@ func NewPekerjaanService(repo repository.IPekerjaanRepository) *PekerjaanService
 	return &PekerjaanService{repo: repo}
 }
 
+// GetAll godoc
+// @Summary Get all pekerjaan
+// @Description Mendapatkan daftar pekerjaan dengan pagination, sorting, dan pencarian
+// @Tags Pekerjaan
+// @Accept json
+// @Produce json
+// @Param page query int false "Nomor halaman"
+// @Param limit query int false "Jumlah data per halaman"
+// @Param sortBy query string false "Kolom untuk sorting (default: created_at)"
+// @Param order query string false "Urutan sort (asc/desc)"
+// @Param search query string false "Kata kunci pencarian"
+// @Success 200 {object} models.PekerjaanResponse
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan [get]
 func (s *PekerjaanService) GetAll(c *fiber.Ctx) error {
-	// ✅ Tambahkan context dengan timeout
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
 
@@ -273,13 +287,11 @@ func (s *PekerjaanService) GetAll(c *fiber.Ctx) error {
 		order = "asc"
 	}
 
-	// ✅ Tambahkan ctx dan ubah nama method
 	data, err := s.repo.GetAll(ctx, search, sortBy, order, limit, offset)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "pekerjaan not found"})
 	}
 
-	// ✅ Tambahkan ctx dan ubah return type ke int64
 	total, err := s.repo.Count(ctx, search)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "gagal menghitung pekerjaan"})
@@ -301,11 +313,21 @@ func (s *PekerjaanService) GetAll(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
+// GetByID godoc
+// @Summary Get pekerjaan by ID
+// @Description Mendapatkan detail pekerjaan berdasarkan ID
+// @Tags Pekerjaan
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Pekerjaan"
+// @Success 200 {object} models.Pekerjaan
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/{id} [get]
 func (s *PekerjaanService) GetByID(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	// ✅ Convert string ID ke ObjectID
 	idStr := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
@@ -323,6 +345,17 @@ func (s *PekerjaanService) GetByID(c *fiber.Ctx) error {
 	return c.JSON(data)
 }
 
+// GetByAlumniID godoc
+// @Summary Get pekerjaan by Alumni ID
+// @Description Mendapatkan daftar pekerjaan berdasarkan alumni ID
+// @Tags Pekerjaan
+// @Accept json
+// @Produce json
+// @Param alumni_id path string true "ID Alumni"
+// @Success 200 {array} models.Pekerjaan
+// @Failure 400 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/alumni/{alumni_id} [get]
 func (s *PekerjaanService) GetByAlumniID(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
@@ -341,6 +374,17 @@ func (s *PekerjaanService) GetByAlumniID(c *fiber.Ctx) error {
 	return c.JSON(data)
 }
 
+// Create godoc
+// @Summary Create pekerjaan baru
+// @Description Menambahkan data pekerjaan baru
+// @Tags Pekerjaan
+// @Accept json
+// @Produce json
+// @Param request body models.CreatePekerjaan true "Data pekerjaan baru"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan [post]
 func (s *PekerjaanService) Create(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
@@ -361,6 +405,18 @@ func (s *PekerjaanService) Create(c *fiber.Ctx) error {
 	})
 }
 
+// Update godoc
+// @Summary Update pekerjaan
+// @Description Memperbarui data pekerjaan berdasarkan ID
+// @Tags Pekerjaan
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Pekerjaan"
+// @Param request body models.UpdatePekerjaan true "Data pekerjaan yang diperbarui"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/{id} [put]
 func (s *PekerjaanService) Update(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
@@ -383,11 +439,19 @@ func (s *PekerjaanService) Update(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "pekerjaan updated"})
 }
 
+// Delete godoc
+// @Summary Hapus pekerjaan permanen
+// @Description Menghapus pekerjaan dari database secara permanen
+// @Tags Pekerjaan
+// @Param id path string true "ID Pekerjaan"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/{id} [delete]
 func (s *PekerjaanService) Delete(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	// ✅ Convert string ID ke ObjectID
 	idStr := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
@@ -401,11 +465,19 @@ func (s *PekerjaanService) Delete(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "pekerjaan deleted"})
 }
 
+// SoftDelete godoc
+// @Summary Soft delete pekerjaan
+// @Description Menghapus pekerjaan tanpa menghapus data di database
+// @Tags Pekerjaan
+// @Param id path string true "ID Pekerjaan"
+// @Success 200 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/soft/{id} [delete]
 func (s *PekerjaanService) SoftDelete(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	// ✅ Convert string ID ke ObjectID
 	idStr := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
@@ -424,12 +496,10 @@ func (s *PekerjaanService) SoftDelete(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"message": "pekerjaan not found"})
 	}
 	
-	// ✅ Compare ObjectID dengan ObjectID
 	userObjID, ok := userID.(primitive.ObjectID)
 	if !ok {
-		// Jika userID adalah string, convert ke ObjectID
 		if userIDStr, ok := userID.(string); ok {
-			userObjID, err = primitive.ObjectIDFromHex(userIDStr)
+			userObjID, err = primitive.ObjectIDFromHex(userIDStr) // ini convert format mongo ke string
 			if err != nil {
 				return c.Status(400).JSON(fiber.Map{"message": "invalid user ID"})
 			}
@@ -442,7 +512,6 @@ func (s *PekerjaanService) SoftDelete(c *fiber.Ctx) error {
 		return c.Status(403).JSON(fiber.Map{"message": "bukan pekerjaanmu dan bukan admin"})
 	}
 	
-	// ✅ SoftDelete tidak perlu parameter UpdatePekerjaan lagi
 	if err := s.repo.SoftDelete(ctx, objID); err != nil {
 		return c.Status(500).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -450,8 +519,16 @@ func (s *PekerjaanService) SoftDelete(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "pekerjaan soft deleted"})
 }
 
+// SoftDeleteBulk godoc
+// @Summary Soft delete semua pekerjaan
+// @Description Menghapus semua pekerjaan (hanya untuk admin)
+// @Tags Pekerjaan
+// @Success 200 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/soft/all [delete]
 func (s *PekerjaanService) SoftDeleteBulk(c *fiber.Ctx) error {
-	ctx, cancel := context.WithTimeout(c.Context(), 30*time.Second) // ← Timeout lebih lama untuk bulk operation
+	ctx, cancel := context.WithTimeout(c.Context(), 30*time.Second) 
 	defer cancel()
 
 	role := c.Locals("role").(string)
@@ -466,11 +543,19 @@ func (s *PekerjaanService) SoftDeleteBulk(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "all pekerjaan soft deleted"})
 }
 
+// Restore godoc
+// @Summary Restore pekerjaan
+// @Description Mengembalikan pekerjaan yang dihapus (soft delete)
+// @Tags Pekerjaan
+// @Param id path string true "ID Pekerjaan"
+// @Success 200 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/restore/{id} [put]
 func (s *PekerjaanService) Restore(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	// ✅ Convert string ID ke ObjectID
 	idStr := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
@@ -489,7 +574,6 @@ func (s *PekerjaanService) Restore(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"message": "pekerjaan not found"})
 	}
 	
-	// ✅ Compare ObjectID dengan ObjectID
 	userObjID, ok := userID.(primitive.ObjectID)
 	if !ok {
 		if userIDStr, ok := userID.(string); ok {
@@ -506,7 +590,6 @@ func (s *PekerjaanService) Restore(c *fiber.Ctx) error {
 		return c.Status(403).JSON(fiber.Map{"message": "bukan pekerjaanmu dan bukan admin"})
 	}
 	
-	// ✅ Restore tidak perlu parameter UpdatePekerjaan lagi
 	if err := s.repo.Restore(ctx, objID); err != nil {
 		return c.Status(500).JSON(fiber.Map{"message": err.Error()})
 	}
@@ -514,13 +597,24 @@ func (s *PekerjaanService) Restore(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "pekerjaan restored"})
 }
 
+// GetTrash godoc
+// @Summary Get semua pekerjaan yang dihapus (trash)
+// @Description Mendapatkan daftar pekerjaan yang sudah dihapus secara soft delete
+// @Tags Pekerjaan
+// @Accept json
+// @Produce json
+// @Param page query int false "Nomor halaman"
+// @Param limit query int false "Jumlah data per halaman"
+// @Success 200 {object} models.PekerjaanResponse
+// @Security BearerAuth
+// @Router /pekerjaan/trash [get]
 func (s *PekerjaanService) GetTrash(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
 
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	limit, _ := strconv.Atoi(c.Query("limit", "10"))
-	sortBy := c.Query("sortBy", "updated_at") // ← Updated_at untuk trash
+	sortBy := c.Query("sortBy", "updated_at") 
 	order := c.Query("order", "desc")
 	search := c.Query("search", "")
 
@@ -545,7 +639,6 @@ func (s *PekerjaanService) GetTrash(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "pekerjaan trash not found"})
 	}
 
-	// ✅ Gunakan CountTrash untuk menghitung trash
 	total, err := s.repo.CountTrash(ctx, search)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "gagal menghitung pekerjaan trash"})
@@ -567,11 +660,19 @@ func (s *PekerjaanService) GetTrash(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
+// DeleteTrash godoc
+// @Summary Hapus pekerjaan dari trash (permanen)
+// @Description Menghapus pekerjaan yang sudah dihapus (trash) secara permanen
+// @Tags Pekerjaan
+// @Param id path string true "ID Pekerjaan"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Security BearerAuth
+// @Router /pekerjaan/trash/{id} [delete]
 func (s *PekerjaanService) DeleteTrash(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
-	// ✅ Convert string ID ke ObjectID
 	idStr := c.Params("id")
 	objID, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {

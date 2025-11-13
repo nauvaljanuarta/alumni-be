@@ -6,13 +6,25 @@ import (
 	"time"
 
 	// "os"
-
 	"pert5/route"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+// @title Alumni API
+// @version 1.0
+// @description API untuk manajemen alumni dan autentikasi
+// @host localhost:3000
+// @BasePath /pert5
+
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
+// @Security BearerAuth
 
 func main() {
 	// config.LoadEnv()

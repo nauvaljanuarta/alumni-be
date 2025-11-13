@@ -346,13 +346,13 @@ func (r *pekerjaanRepository) Create(ctx context.Context, req models.CreatePeker
 			return nil, errors.New("invalid alumni_id")
 	}
 
-	// Parse tanggal mulai
+	// parse tgl mulai
 	tMulai, err := time.Parse("2006-01-02", req.TanggalMulaiKerja)
 	if err != nil {
 			return nil, errors.New("invalid tanggal_mulai_kerja")
 	}
 
-	// Parse tanggal selesai jika ada
+	// tanggal selesai kerja di parse 
 	var tSelesai *time.Time
 	if req.TanggalSelesaiKerja != nil && *req.TanggalSelesaiKerja != "" {
 			ts, err := time.Parse("2006-01-02", *req.TanggalSelesaiKerja)

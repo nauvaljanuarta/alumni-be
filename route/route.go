@@ -5,6 +5,9 @@ import (
 	"pert5/app/repository"
 	"pert5/app/service"
 	"pert5/middleware"
+	_ "pert5/docs" 
+	"github.com/gofiber/swagger"
+
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,6 +16,7 @@ import (
 // func SetupRoutes(app *fiber.App, db *sql.DB) {
 func SetupRoutes(app *fiber.App, db *mongo.Database) {
 	api := app.Group("/pert5")
+	api.Get("/swagger/*", swagger.HandlerDefault)
 
 	// auth login 
 	alumniRepo := repository.NewAlumniRepository(db)

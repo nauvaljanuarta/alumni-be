@@ -68,7 +68,7 @@ import (
 // 	Role   string `json:"role"`
 // 	jwt.RegisteredClaims
 // }
-
+// User model (contoh sederhana)
 type Alumni struct {
 	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	NIM        string             `bson:"nim" json:"nim"`

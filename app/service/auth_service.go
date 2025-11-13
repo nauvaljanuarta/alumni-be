@@ -16,6 +16,18 @@ func NewAuthService(repo repository.IAlumniRepository) *AuthService {
 	return &AuthService{repo: repo}
 }
 
+// Login godoc
+// @Summary Login Alumni
+// @Description Authenticate alumni and return JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body models.LoginRequest true "Login Credentials"
+// @Success 200 {object} models.LoginResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /login [post]
 func (s *AuthService) Login(c *fiber.Ctx) error {
 	var req struct {
 		Email    string `json:"email"`
