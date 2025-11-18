@@ -398,5 +398,3 @@ func (s *FileService) toFileResponse(file *models.File) *models.FileResponse {
 		UploadedAt:   file.UploadedAt,
 	}
 }
-
-
